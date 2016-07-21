@@ -8,3 +8,6 @@ void status_toAdc(void);
 void status_toDac(void);
 void touch_stop(void);
 char* GetSec(void);
+void Clear_SD(void);
+void GUI_UpdateSec(void);
+void GUI_UpdateProgbar(void);

@@ -5,6 +5,8 @@
 #include "adc.h"
 #include "dac.h"
 #include "mmc_sd.h"
+#include "ui.h"
+#include "sys.h"
 
 //////////////////////////////////////////////////////////////////////////////////	 
 //本程序只供学习使用，未经作者许可，不得用于其它任何用途
@@ -35,7 +37,7 @@ void TIM3_IRQHandler(void)
 	//LCD_ShowxNum(60,250,TIM3->CNT,4,16,0);
 	if(TIM3->SR&0X0001)//溢出中断
 	{
-		LED1=!LED1;
+		//LED1=!LED1;
 		//PAout(15)=!PAout(15);//示波器观看
 		//if (state) tim3_en=1;
 		//else tim3_en=0;
@@ -46,20 +48,24 @@ void TIM3_IRQHandler(void)
 			buf[i]=adcx>>4;
 			if (buf[i]>buf_max) buf_max=buf[i];
 			i++;
-			LED0 = 0;
+			//LED0 = 0;
 			if (i==512){
 				SD_WriteDisk(buf,sec,1);
 				sec++;
 				i=0;
+				//Update UI
+				GUI_UpdateSec();
 			}
 		}
 		else if (state == 2){
 			if (sec_read<sec){
 				if (i_read==512){
-					LED0 = 0;
+					//LED0 = 0;
 					sec_read++;
 					SD_ReadDisk(buf_read,sec_read,1);
 					i_read=0;
+					//Update UI
+					GUI_UpdateProgbar();
 				}
 			}
 			else if (i_read==i){

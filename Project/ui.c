@@ -11,6 +11,9 @@
 #include "timer.h"
 #include "delay.h"
 
+#define ID_TEXT_1		 (GUI_ID_USER + 0x05)
+#define ID_PROGBAR_0		   (GUI_ID_USER + 0x07)
+
 u8 state=0;
 extern u8 tim3_en;
 
@@ -23,21 +26,36 @@ u16 i=0,sec=0;
 u16 i_read=0,sec_read=0;
 char printedStr2[32]="Sec: ";
 
+WM_HWIN hWin;
+
 char* GetSec(){
 	sprintf(printedStr2 + 5,"%u",sec);
 	return printedStr2;
 }
 
 void status_toAdc(){
+	LED0 = 0;
+	LED1 = 1;
 	state = 1;
 }
 
 void status_toDac(){
 	state = 2;
 	LED0 = 1;
+	LED1 = 0;
 	sec_read = 1;
 	SD_ReadDisk(buf_read,sec_read,1);
 	i_read = 0;
+}
+
+void Clear_SD(){
+	state = 0;
+	buf_max = 0;
+	sec = 1;
+	i = 0;
+	LED0 = 1;
+	LED1 = 1;
+	save_mem(sec,i,buf_max);
 }
 
 void touch_stop(){
@@ -50,6 +68,7 @@ void touch_stop(){
 	}
 	state = 0;
 	LED0 = 1;
+	LED1 = 1;
 }
 
 void SD_Read_Sectorx(u32 sec)
@@ -74,6 +93,7 @@ void SD_Read_Sectorx(u32 sec)
 
 void UI_Main(){
 	LED0 = 1;
+	LED1 = 1;
 	PAout(15) = 0;
 	buf=mymalloc(512);
 	buf_read=mymalloc(512);
@@ -82,48 +102,11 @@ void UI_Main(){
 	SD_WriteDisk(buf,sec,1);
 	
 	BUTTON_SetDefaultSkin(BUTTON_SKIN_FLEX);
-	CreateFramewin();
+	PROGBAR_SetDefaultSkin   (PROGBAR_SKIN_FLEX);
+	
+	hWin = CreateFramewin();
 	while(1)
 	{
-		/*
-		switch (state){
-			case 0:
-				GUI_Delay(1);
-				break;
-			case 1:
-				while(!tim3_en);//等待允许信号
-				
-				tim3_en=0;
-				PAout(15)=!PAout(15);//示波器观看
-				//adcx=Get_Adc_Average(ADC_CH1,10);		
-				adcx=Get_Adc(ADC_CH1);
-				buf[i]=adcx>>4;
-				if (buf[i]>buf_max) buf_max=buf[i];
-				i++;
-				//GUI_Exec();
-			    LED0 = 0;
-			    GUI_Delay(1);
-				//printf("state: %d\r\n", state);
-				if (i==512){
-					SD_WriteDisk(buf,sec,1);
-					sec++;
-					i=0;
-				}
-				//LED0=!LED0;//观察采样频率
-				break;
-				GUI_Delay(1);
-				break;
-			case 2:
-				while(!tim3_en);
-				tim3_en=0;
-				PAout(15)=!PAout(15);//观察采样频率
-				temp=buf_read[i_read++];
-				DAC->DHR8R1=(float)temp/buf_max*200;
-			    GUI_Delay(1);
-				break;
-			default:
-				break;
-		}*/
 		GUI_Delay(1);
 	}
 
@@ -154,6 +137,16 @@ void save_mem(u16 sec,u16 i,u8 max){
 	myfree(buf_mem);
 }
 
+void GUI_UpdateSec(){
+	WM_HWIN hItemText;
+	sprintf(printedStr2 + 5,"%u",sec);
+	hItemText = WM_GetDialogItem(hWin, ID_TEXT_1);
+	TEXT_SetText(hItemText, printedStr2);
+}
 
-
-
+void GUI_UpdateProgbar(){
+	WM_HWIN hItemBar;
+	hItemBar = WM_GetDialogItem(hWin, ID_PROGBAR_0);
+	PROGBAR_SetValue(hItemBar, sec_read * 100 / sec);
+	//PROGBAR_SetValue(hItemBar, 50);
+}

@@ -37,6 +37,9 @@
 #define ID_BUTTON_0            (GUI_ID_USER + 0x02)
 #define ID_BUTTON_1			   (GUI_ID_USER + 0x03)
 #define ID_BUTTON_2			   (GUI_ID_USER + 0x04)
+#define ID_BUTTON_3			   (GUI_ID_USER + 0x06)		
+#define ID_PROGBAR_0		   (GUI_ID_USER + 0x07)
+
 #define BUTTON_PRESSED	1
 #define BUTTON_UNPRESSED 0
 
@@ -65,6 +68,8 @@ static const GUI_WIDGET_CREATE_INFO _aDialogCreate[] = {
   { BUTTON_CreateIndirect, "Button", ID_BUTTON_0, 60, 60, 75, 25, 0, 0x0, 0 },
   { BUTTON_CreateIndirect, "Button", ID_BUTTON_1, 60, 100, 75, 25, 0, 0x0, 0 },
   { BUTTON_CreateIndirect, "Button", ID_BUTTON_2, 60, 140, 75, 25, 0, 0x0, 0 },
+  { BUTTON_CreateIndirect, "Button", ID_BUTTON_3, 150, 140, 75, 25, 0, 0x0, 0 },
+  { PROGBAR_CreateIndirect, "Progbar", ID_PROGBAR_0, 84, 180, 134, 20, 0, 0x0, 0 },
 };
 
 /*********************************************************************
@@ -114,24 +119,31 @@ static void _cbDialog(WM_MESSAGE * pMsg) {
 		TEXT_SetFont(hItem, GUI_FONT_20_ASCII);
 		TEXT_SetTextColor(hItem, 0x00FF0000);
 		//
-		// Initialization of 'Button1'
+		// Initialization of 'Button0'
 		//
 		hItem = WM_GetDialogItem(pMsg->hWin, ID_BUTTON_0);
 		BUTTON_SetFont(hItem, GUI_FONT_20_ASCII);
 		BUTTON_SetText(hItem, "Record");
 		//
-		// Initialization of 'Button2'
+		// Initialization of 'Button1'
 		//
 		hItem = WM_GetDialogItem(pMsg->hWin, ID_BUTTON_1);
 		BUTTON_SetFont(hItem, GUI_FONT_20_ASCII);
 		BUTTON_SetText(hItem, "Play");
 		//
-		// Initialization of 'Button3'
+		// Initialization of 'Button2'
 		//
 		hItem = WM_GetDialogItem(pMsg->hWin, ID_BUTTON_2);
 		BUTTON_SetFont(hItem, GUI_FONT_20_ASCII);
 		BUTTON_SetText(hItem, "Stop");
-		BUTTON_SetPressed(hItem, BUTTON_PRESSED);
+		//BUTTON_SetPressed(hItem, BUTTON_PRESSED);
+		//
+		// Initialization of 'Button3'
+		//
+		hItem = WM_GetDialogItem(pMsg->hWin, ID_BUTTON_3);
+		BUTTON_SetFont(hItem, GUI_FONT_20_ASCII);
+		BUTTON_SetText(hItem, "Clear");
+		//BUTTON_SetPressed(hItem, BUTTON_PRESSED);
 		// USER START (Optionally insert additional code for further widget initialization)
 		// USER END
 		break;
@@ -151,8 +163,10 @@ static void _cbDialog(WM_MESSAGE * pMsg) {
 					      BUTTON_SetPressed(hItemButton, BUTTON_PRESSED);
 						  hItemButton = WM_GetDialogItem(pMsg->hWin, ID_BUTTON_1);
 						  BUTTON_SetPressed(hItemButton, BUTTON_UNPRESSED);
-					      hItemButton = WM_GetDialogItem(pMsg->hWin, ID_BUTTON_2);
-						  BUTTON_SetPressed(hItemButton, BUTTON_UNPRESSED);
+					      //hItemButton = WM_GetDialogItem(pMsg->hWin, ID_BUTTON_2);
+						  //BUTTON_SetPressed(hItemButton, BUTTON_UNPRESSED);
+						  hItemText = WM_GetDialogItem(pMsg->hWin, ID_TEXT_1);
+					      TEXT_SetText(hItemText, GetSec());
 					      status_toAdc();
 						  break;
 					  default:
@@ -170,8 +184,10 @@ static void _cbDialog(WM_MESSAGE * pMsg) {
 					      BUTTON_SetPressed(hItemButton, BUTTON_PRESSED);
 						  hItemButton = WM_GetDialogItem(pMsg->hWin, ID_BUTTON_0);
 						  BUTTON_SetPressed(hItemButton, BUTTON_UNPRESSED);
-					      hItemButton = WM_GetDialogItem(pMsg->hWin, ID_BUTTON_2);
-						  BUTTON_SetPressed(hItemButton, BUTTON_UNPRESSED);
+					      //hItemButton = WM_GetDialogItem(pMsg->hWin, ID_BUTTON_2);
+						  //BUTTON_SetPressed(hItemButton, BUTTON_UNPRESSED);
+						  hItemText = WM_GetDialogItem(pMsg->hWin, ID_TEXT_1);
+					      TEXT_SetText(hItemText, GetSec());
 					      status_toDac();
 						  break;
 					  default:
@@ -189,11 +205,28 @@ static void _cbDialog(WM_MESSAGE * pMsg) {
 					      BUTTON_SetPressed(hItemButton, BUTTON_UNPRESSED);
 						  hItemButton = WM_GetDialogItem(pMsg->hWin, ID_BUTTON_1);
 						  BUTTON_SetPressed(hItemButton, BUTTON_UNPRESSED);
-						  hItemButton = WM_GetDialogItem(pMsg->hWin, ID_BUTTON_2);
-						  BUTTON_SetPressed(hItemButton, BUTTON_PRESSED);
+						  //hItemButton = WM_GetDialogItem(pMsg->hWin, ID_BUTTON_2);
+						  //BUTTON_SetPressed(hItemButton, BUTTON_PRESSED);
 						  hItemText = WM_GetDialogItem(pMsg->hWin, ID_TEXT_1);
 					      TEXT_SetText(hItemText, GetSec());
 					      touch_stop();
+						  break;
+					  default:
+						  break;
+				  }
+				  break;
+			  case ID_BUTTON_3:
+				  switch(NCode){
+					  case WM_NOTIFICATION_CLICKED:
+						  break;
+					  case WM_NOTIFICATION_RELEASED:
+						  Clear_SD();
+						  hItemButton = WM_GetDialogItem(pMsg->hWin, ID_BUTTON_0);
+					      BUTTON_SetPressed(hItemButton, BUTTON_UNPRESSED);
+						  hItemButton = WM_GetDialogItem(pMsg->hWin, ID_BUTTON_1);
+						  BUTTON_SetPressed(hItemButton, BUTTON_UNPRESSED);
+						  hItemText = WM_GetDialogItem(pMsg->hWin, ID_TEXT_1);
+					      TEXT_SetText(hItemText, "Cleared!");
 						  break;
 					  default:
 						  break;
